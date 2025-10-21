@@ -1,3 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Color Picker Spotlight</title>
+</head>
+<body>
+
+<script type="text/markdown" id="README" style="display:none">
+# Color Picker Spotlight
+
+## Overview
+
+A lightweight, interactive color picker demo that combines a native HTML5 color input with a visually appealing 3D-styled ball element. The ball responds dynamically to both color changes and mouse movements, creating an engaging user experience with parallax wobble effects.
+
+## How It Works
+
+### Core Components
+
+1. **Color Picker Input** (`#picker`)
+   - Native HTML5 `<input type="color">` element
+   - Default value: `#4f46e5` (indigo)
+   - Styled with custom dimensions (120×60px)
+
+2. **Animated Ball** (`#ball`)
+   - 140×140px circular div with radial gradient shadow effects
+   - Responds to color changes and mouse interactions
+   - Features smooth CSS transitions (0.2s duration)
+
+### Core Logic
+
+**Color Update Flow:**
+- When user selects a color from the picker, the `input` event fires
+- Ball's background updates to the selected color
+- Body background updates to the same color with 20% opacity (`color + '20'`)
+- CSS transitions ensure smooth visual changes
+
+**Parallax Wobble Effect:**
+- `mousemove` event calculates mouse position relative to ball's center
+- Displacement is normalized by ball dimensions and scaled (±12px max)
+- Ball translates in 2D space (`translate(dx, dy)`) to follow cursor
+- `mouseleave` event resets ball position to center
+
+### Dependencies
+
+- **None** - This is a standalone HTML file with no external dependencies
+- Uses vanilla JavaScript and native HTML5/CSS3 features
+- Compatible with modern browsers supporting:
+  - `<input type="color">` (Chrome 20+, Firefox 29+, Safari 14.1+)
+  - CSS transforms and transitions
+  - Modern DOM APIs (`getBoundingClientRect`, event listeners)
+
+## Running Locally
+
+### Simple Method
+1. Save this file as `ColorPickerSpotlight.html`
+2. Open the file directly in any modern web browser
+3. No build process or server required
+
+### Development Server (Optional)
+If you need to test in a server environment:
+
+```bash
+# Using Python 3
+python3 -m http.server 8000
+
+# Using Node.js (http-server package)
+npx http-server -p 8000
+
+# Using PHP
+php -S localhost:8000
+```
+
+Then navigate to `http://localhost:8000/ColorPickerSpotlight.html`
+
+## Customization
+
+### Modifying Colors
+- Change default color: Update `value="#4f46e5"` in the input element
+- Adjust background opacity: Modify `'20'` in `picker.value + '20'` (hex opacity values: 00-FF)
+
+### Ball Styling
+- **Size:** Adjust `width:140px;height:140px` in the ball div
+- **Shadow effects:** Modify the `box-shadow` property for different depth effects
+- **Transition speed:** Change `transition:transform .2s, background .2s` values
+
+### Parallax Intensity
+- Adjust the multiplier `* 12` in the transform calculation (lines with `dx` and `dy`)
+- Higher values = more dramatic movement
+- Lower values = subtler effect
+
+### Layout & Typography
+- Container width: Change `max-width:560px`
+- Font family: Update `font-family:system-ui` to any web-safe or custom font
+- Spacing: Modify margin/padding values in inline styles
+
+## Accessibility Notes
+
+### Current Limitations
+1. **No keyboard navigation for parallax effect** - Mouse-only interaction
+2. **Color picker label missing** - Screen readers won't announce the purpose
+3. **No ARIA attributes** - Limited semantic information for assistive technologies
+4. **Low contrast text** - The instruction text uses `#555` which may not meet WCAG AA standards
+
+### Recommended Improvements
+```html
+<!-- Add explicit label -->
+<label for="picker">Choose a color:</label>
+<input id="picker" type="color" value="#4f46e5" aria-label="Color picker for ball">
+
+<!-- Improve text contrast -->
+<p style="color:#333">Pick a color and hover over the circle ✨</p>
+
+<!-- Add ARIA role and description -->
+<div id="ball" role="img" aria-label="Interactive ball that follows your mouse cursor">
+```
+
+### Motion Sensitivity
+- Consider adding `prefers-reduced-motion` media query:
+```css
+@media (prefers-reduced-motion: reduce) {
+  #ball { transition: none !important; }
+}
+```
+
+### Browser Support Notes
+- Color picker input may render differently across browsers
+- Fallback to text input on very old browsers (pre-2015)
+- Parallax effect requires JavaScript - provide graceful degradation
+
+**File Type:** Standalone HTML demo  
+**Last Updated:** 2025  
+**Browser Compatibility:** Modern browsers (ES6+)
+</script>
+
 <div style="font-family:system-ui;max-width:560px;margin:24px auto;text-align:center">
   <h2>Color Picker Spotlight</h2>
   <input id="picker" type="color" value="#4f46e5" style="width:120px;height:60px;border:none">
@@ -27,3 +163,6 @@
   });
   ball.addEventListener('mouseleave', () => ball.style.transform = 'translate(0,0)');
 </script>
+
+</body>
+</html>
