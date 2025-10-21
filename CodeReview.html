@@ -1,31 +1,250 @@
-<div style="font-family:system-ui;max-width:520px;margin:24px auto">
-  <h2>Quick Tasks</h2>
-  <input id="txt" placeholder="Type task..." style="padding:8px;width:70%">
-  <button onclick="add()">Add</button>
-  <button onclick="clearDone()">Clear Done</button>
-  <ul id="list" style="list-style:none;padding:0;margin-top:12px"></ul>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Tasks</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 520px;
+      margin: 24px auto;
+      padding: 0 16px;
+    }
+    h1 {
+      font-size: 1.5rem;
+      margin: 0 0 16px 0;
+    }
+    .task-form {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .task-input {
+      flex: 1;
+      min-width: 200px;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+    .task-input:focus {
+      outline: 2px solid #0066cc;
+      outline-offset: 2px;
+    }
+    .btn {
+      padding: 8px 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: #f5f5f5;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    .btn:hover {
+      background: #e5e5e5;
+    }
+    .btn:focus {
+      outline: 2px solid #0066cc;
+      outline-offset: 2px;
+    }
+    .btn-primary {
+      background: #0066cc;
+      color: white;
+      border-color: #0066cc;
+    }
+    .btn-primary:hover {
+      background: #0052a3;
+    }
+    .task-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .task-item {
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin: 8px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .task-checkbox {
+      margin: 0;
+      cursor: pointer;
+      width: 18px;
+      height: 18px;
+    }
+    .task-text {
+      flex: 1;
+      word-break: break-word;
+    }
+    .task-item.completed .task-text {
+      text-decoration: line-through;
+      color: #666;
+    }
+    .delete-btn {
+      padding: 4px 12px;
+      background: #dc3545;
+      color: white;
+      border: 1px solid #dc3545;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .delete-btn:hover {
+      background: #c82333;
+    }
+    .delete-btn:focus {
+      outline: 2px solid #dc3545;
+      outline-offset: 2px;
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Quick Tasks</h1>
+    <form class="task-form" id="taskForm" onsubmit="return false;">
+      <label for="taskInput" class="sr-only">Task description</label>
+      <input 
+        type="text" 
+        id="taskInput" 
+        class="task-input"
+        placeholder="Type task..."
+        aria-label="Task description"
+        required>
+      <button type="submit" class="btn btn-primary" id="addBtn" aria-label="Add task">Add</button>
+      <button type="button" class="btn" id="clearBtn" aria-label="Clear completed tasks">Clear Done</button>
+    </form>
+    <ul id="taskList" class="task-list" role="list" aria-label="Task list"></ul>
+  </div>
 
-<script>
-  // Globals + inline handlers + mixed responsibilities (intentionally)
-  const L = document.getElementById('list');
-  function add(){
-    const v = document.getElementById('txt').value;
-    if(!v){ alert('Type something'); return; }
-    const li = document.createElement('li');
-    li.style.padding='8px';
-    li.style.border='1px solid #ddd';
-    li.style.margin='6px 0';
-    li.innerHTML = '<input type=checkbox> ' + v + ' <button class=del>[x]</button>';
-    L.appendChild(li);
-    document.getElementById('txt').value='';
-    L.onclick = function(e){
-      if(e.target.className==='del'){ e.target.parentNode.remove(); }
-    };
-  }
-  function clearDone(){
-    document.querySelectorAll('#list input[type=checkbox]').forEach(cb=>{
-      if(cb.checked) cb.parentNode.remove();
-    });
-  }
-</script>
+  <script>
+    (function() {
+      'use strict';
+      
+      // DOM element references
+      const taskInput = document.getElementById('taskInput');
+      const taskList = document.getElementById('taskList');
+      const taskForm = document.getElementById('taskForm');
+      const clearBtn = document.getElementById('clearBtn');
+      
+      // Counter for unique IDs
+      let taskIdCounter = 0;
+      
+      // Escape HTML to prevent XSS attacks
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+      
+      // Add a new task
+      function addTask() {
+        const taskText = taskInput.value.trim();
+        
+        if (!taskText) {
+          alert('Please type a task description');
+          taskInput.focus();
+          return;
+        }
+        
+        const taskId = 'task-' + (++taskIdCounter);
+        const listItem = document.createElement('li');
+        listItem.className = 'task-item';
+        listItem.setAttribute('role', 'listitem');
+        
+        // Create checkbox
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = taskId;
+        checkbox.className = 'task-checkbox';
+        checkbox.setAttribute('aria-label', 'Mark task as complete');
+        
+        // Create label for checkbox
+        const label = document.createElement('label');
+        label.htmlFor = taskId;
+        label.className = 'task-text';
+        label.textContent = taskText;
+        
+        // Create delete button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.setAttribute('aria-label', 'Delete task: ' + taskText);
+        
+        // Append elements
+        listItem.appendChild(checkbox);
+        listItem.appendChild(label);
+        listItem.appendChild(deleteBtn);
+        taskList.appendChild(listItem);
+        
+        // Clear input and focus
+        taskInput.value = '';
+        taskInput.focus();
+      }
+      
+      // Remove completed tasks
+      function clearCompletedTasks() {
+        const checkboxes = taskList.querySelectorAll('.task-checkbox:checked');
+        checkboxes.forEach(checkbox => {
+          checkbox.closest('.task-item').remove();
+        });
+        taskInput.focus();
+      }
+      
+      // Handle task list click events (delete button and checkbox)
+      function handleTaskListClick(event) {
+        const target = event.target;
+        
+        // Handle delete button click
+        if (target.classList.contains('delete-btn')) {
+          target.closest('.task-item').remove();
+          taskInput.focus();
+        }
+        
+        // Handle checkbox change (toggle completed class)
+        if (target.classList.contains('task-checkbox')) {
+          const listItem = target.closest('.task-item');
+          if (target.checked) {
+            listItem.classList.add('completed');
+          } else {
+            listItem.classList.remove('completed');
+          }
+        }
+      }
+      
+      // Event listeners
+      taskForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        addTask();
+      });
+      
+      clearBtn.addEventListener('click', clearCompletedTasks);
+      
+      // Use event delegation for task list interactions
+      taskList.addEventListener('click', handleTaskListClick);
+      
+      // Focus input on load
+      taskInput.focus();
+    })();
+  </script>
+</body>
+</html>
