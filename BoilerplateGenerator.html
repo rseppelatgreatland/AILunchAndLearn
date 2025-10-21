@@ -1,1 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emoji Mood Slider</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      transition: background-color 0.5s ease;
+    }
 
+    #app {
+      text-align: center;
+      padding: 40px;
+      max-width: 500px;
+      width: 100%;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 30px;
+      color: #333;
+    }
+
+    #emoji-display {
+      font-size: 120px;
+      margin: 30px 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      user-select: none;
+    }
+
+    #emoji-display:hover {
+      transform: scale(1.1);
+    }
+
+    #mood-slider {
+      width: 100%;
+      height: 12px;
+      -webkit-appearance: none;
+      appearance: none;
+      border-radius: 6px;
+      background: linear-gradient(to right, #6366f1, #8b5cf6, #d946ef, #f472b6);
+      outline: none;
+      margin: 20px 0;
+      cursor: pointer;
+    }
+
+    #mood-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    #mood-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    #mood-slider::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      border: none;
+      transition: transform 0.2s ease;
+    }
+
+    #mood-slider::-moz-range-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    #mood-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-size: 14px;
+      color: #666;
+      padding: 0 10px;
+    }
+
+    .mood-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .mood-emoji {
+      font-size: 20px;
+    }
+
+    #current-mood {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      min-height: 28px;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1>Emoji Mood Slider</h1>
+    
+    <div id="emoji-display" role="img" aria-label="Current mood emoji">😐</div>
+    
+    <label for="mood-slider" class="visually-hidden">
+      Adjust your mood from 0 (sad) to 100 (ecstatic)
+    </label>
+    <input 
+      type="range" 
+      id="mood-slider" 
+      min="0" 
+      max="100" 
+      value="50" 
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuenow="50"
+      aria-label="Mood slider"
+    >
+    
+    <div id="mood-labels">
+      <div class="mood-label">
+        <span class="mood-emoji">😢</span>
+        <span>Sad</span>
+      </div>
+      <div class="mood-label">
+        <span class="mood-emoji">😐</span>
+        <span>Meh</span>
+      </div>
+      <div class="mood-label">
+        <span class="mood-emoji">😄</span>
+        <span>Happy</span>
+      </div>
+      <div class="mood-label">
+        <span class="mood-emoji">🤩</span>
+        <span>Ecstatic</span>
+      </div>
+    </div>
+    
+    <div id="current-mood" aria-live="polite">Meh</div>
+  </div>
+
+  <script>
+    // Setup function to initialize the app
+    function setup() {
+      const slider = document.getElementById('mood-slider');
+      const emojiDisplay = document.getElementById('emoji-display');
+      const currentMoodText = document.getElementById('current-mood');
+      
+      // Mood configuration based on slider value ranges
+      const moods = [
+        { max: 25, emoji: '😢', label: 'Sad', color: '#dbeafe' },
+        { max: 50, emoji: '😐', label: 'Meh', color: '#e0e7ff' },
+        { max: 75, emoji: '😄', label: 'Happy', color: '#fae8ff' },
+        { max: 100, emoji: '🤩', label: 'Ecstatic', color: '#fce7f3' }
+      ];
+      
+      // Function to update mood state based on slider value
+      function updateMood(value) {
+        // Find the appropriate mood for the current value
+        const mood = moods.find(m => value <= m.max);
+        
+        // Update emoji display
+        emojiDisplay.textContent = mood.emoji;
+        emojiDisplay.setAttribute('aria-label', `Current mood: ${mood.label}`);
+        
+        // Update current mood text
+        currentMoodText.textContent = mood.label;
+        
+        // Update background color with smooth transition
+        document.body.style.backgroundColor = mood.color;
+        
+        // Update slider aria-valuenow for accessibility
+        slider.setAttribute('aria-valuenow', value);
+      }
+      
+      // Event listener for slider input - updates state on every change
+      slider.addEventListener('input', (event) => {
+        const value = parseInt(event.target.value, 10);
+        updateMood(value);
+      });
+      
+      // Initialize with default value (50 = Meh)
+      updateMood(50);
+    }
+    
+    // Run setup when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setup);
+    } else {
+      setup();
+    }
+  </script>
+</body>
+</html>
