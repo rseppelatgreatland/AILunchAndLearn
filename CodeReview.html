@@ -1,0 +1,31 @@
+<div style="font-family:system-ui;max-width:520px;margin:24px auto">
+  <h2>Quick Tasks</h2>
+  <input id="txt" placeholder="Type task..." style="padding:8px;width:70%">
+  <button onclick="add()">Add</button>
+  <button onclick="clearDone()">Clear Done</button>
+  <ul id="list" style="list-style:none;padding:0;margin-top:12px"></ul>
+</div>
+
+<script>
+  // Globals + inline handlers + mixed responsibilities (intentionally)
+  const L = document.getElementById('list');
+  function add(){
+    const v = document.getElementById('txt').value;
+    if(!v){ alert('Type something'); return; }
+    const li = document.createElement('li');
+    li.style.padding='8px';
+    li.style.border='1px solid #ddd';
+    li.style.margin='6px 0';
+    li.innerHTML = '<input type=checkbox> ' + v + ' <button class=del>[x]</button>';
+    L.appendChild(li);
+    document.getElementById('txt').value='';
+    L.onclick = function(e){
+      if(e.target.className==='del'){ e.target.parentNode.remove(); }
+    };
+  }
+  function clearDone(){
+    document.querySelectorAll('#list input[type=checkbox]').forEach(cb=>{
+      if(cb.checked) cb.parentNode.remove();
+    });
+  }
+</script>
