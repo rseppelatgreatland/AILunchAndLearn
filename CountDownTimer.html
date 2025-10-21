@@ -1,0 +1,27 @@
+
+<div style="font-family:system-ui;max-width:520px;margin:24px auto;text-align:center">
+  <h2>Buggy Countdown</h2>
+  <input id="secs" type="number" min="1" value="5" style="padding:6px;width:100px">
+  <button id="go">Start</button>
+  <div style="font-size:40px;margin-top:12px" id="timer">⏳</div>
+</div>
+
+<script>
+  // Intentional id-mismatch bug: code looks for #time, HTML uses #timer
+  const display = document.getElementById('time'); // <- null
+  let t = null;
+
+  function startCountdown() {
+    clearInterval(t);
+    let n = parseInt(document.getElementById('secs').value, 10) || 5;
+    t = setInterval(()=>{
+      display.textContent = n + 's';  // <-- throws because display is null
+      if(n-- <= 0){
+        clearInterval(t);
+        display.textContent = '🎉';
+      }
+    }, 1000);
+  }
+
+  document.getElementById('go').addEventListener('click', startCountdown);
+</script>
