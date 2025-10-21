@@ -48,17 +48,56 @@
       "I only know 25 letters of the alphabet. I don't know y."
     ];
 
+    // Simple cache to store fetched jokes
+    var jokeCache = [];
+
     function showJoke() {
-      // Random index (definitely not cryptographically secure!)
-      var i = Math.floor(Math.random() * dadJokes.length);
-      document.getElementById('joke').innerText = dadJokes[i];
-
-      // Bad UX flourish: always force scroll to the top
-      document.getElementById('joke').scrollTop = 0;
-
-      // Sloppy global state counter
-      window.jokeCount = (window.jokeCount || 0) + 1;
-      document.getElementById('counter').innerText = 'Jokes shown: ' + window.jokeCount;
+      var jokeElement = document.getElementById('joke');
+      
+      // Show loading message
+      jokeElement.innerText = 'Loading joke...';
+      
+      // Fetch joke from API
+      fetch('https://icanhazdadjoke.com/', {
+        headers: {
+          'Accept': 'application/json'
+        }
+      })
+      .then(function(response) {
+        if (!response.ok) {
+          throw new Error('API request failed');
+        }
+        return response.json();
+      })
+      .then(function(data) {
+        // Display the joke from API
+        jokeElement.innerText = data.joke;
+        
+        // Cache the joke
+        if (jokeCache.indexOf(data.joke) === -1) {
+          jokeCache.push(data.joke);
+        }
+        
+        // Bad UX flourish: always force scroll to the top
+        jokeElement.scrollTop = 0;
+        
+        // Sloppy global state counter
+        window.jokeCount = (window.jokeCount || 0) + 1;
+        document.getElementById('counter').innerText = 'Jokes shown: ' + window.jokeCount;
+      })
+      .catch(function(error) {
+        // Fallback to cached jokes or hardcoded jokes on error
+        var fallbackJokes = jokeCache.length > 0 ? jokeCache : dadJokes;
+        var i = Math.floor(Math.random() * fallbackJokes.length);
+        jokeElement.innerText = fallbackJokes[i];
+        
+        // Bad UX flourish: always force scroll to the top
+        jokeElement.scrollTop = 0;
+        
+        // Sloppy global state counter
+        window.jokeCount = (window.jokeCount || 0) + 1;
+        document.getElementById('counter').innerText = 'Jokes shown: ' + window.jokeCount;
+      });
     }
   </script>
 </body>
