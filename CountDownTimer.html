@@ -7,15 +7,15 @@
 </div>
 
 <script>
-  // Intentional id-mismatch bug: code looks for #time, HTML uses #timer
-  const display = document.getElementById('time'); // <- null
+  // Fixed: now correctly references #timer to match the HTML element
+  const display = document.getElementById('timer'); // <- now correctly finds the element
   let t = null;
 
   function startCountdown() {
     clearInterval(t);
     let n = parseInt(document.getElementById('secs').value, 10) || 5;
     t = setInterval(()=>{
-      display.textContent = n + 's';  // <-- throws because display is null
+      display.textContent = n + 's';  // Updates the display with current countdown value
       if(n-- <= 0){
         clearInterval(t);
         display.textContent = '🎉';
