@@ -3,59 +3,187 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Terribly Designed Dad Joke Machine</title>
+  <title>Dad Jokes Generator</title>
   <style>
-    /* intentionally questionable styles :) */
-    body { background:#aaff00; font-family:"Comic Sans MS", cursive, sans-serif; }
-    #app { width:350px; border:5px dotted hotpink; padding:7px; margin:40px 0 0 12px; }
-    h1 { color:red; letter-spacing:8px; text-shadow:2px 2px 0 yellow; }
-    #joke { min-height:90px; background:white; border:3px ridge #333; padding:6px; overflow:scroll; }
-    button { font-size:28px; background:linear-gradient(90deg, magenta, cyan); border:4px double black; width:100%; cursor:pointer; }
-    .tiny { font-size:10px; color:#444; }
-    label { display:block; margin-top:8px; }
+    /* Modern, accessible styling */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body { 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    #app { 
+      max-width: 600px;
+      width: 100%;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      padding: 40px;
+    }
+    
+    h1 { 
+      color: #2d3748;
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    
+    .subtitle {
+      color: #718096;
+      font-size: 0.875rem;
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    
+    #joke { 
+      min-height: 120px;
+      background: #f7fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 24px;
+      font-size: 1.125rem;
+      line-height: 1.6;
+      color: #2d3748;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    
+    #joke.loading {
+      color: #718096;
+      font-style: italic;
+    }
+    
+    button { 
+      font-size: 1.125rem;
+      font-weight: 600;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 16px 32px;
+      width: 100%;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);
+    }
+    
+    button:hover {
+      background: #5a67d8;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+    }
+    
+    button:focus {
+      outline: 3px solid #667eea;
+      outline-offset: 2px;
+    }
+    
+    button:disabled {
+      background: #cbd5e0;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    #counter { 
+      font-size: 0.875rem;
+      color: #718096;
+      text-align: center;
+      margin-top: 16px;
+    }
+    
+    /* Responsive design */
+    @media (max-width: 640px) {
+      #app {
+        padding: 24px;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+      }
+      
+      #joke {
+        font-size: 1rem;
+        min-height: 100px;
+        padding: 20px;
+      }
+      
+      button {
+        font-size: 1rem;
+        padding: 14px 24px;
+      }
+    }
   </style>
 </head>
 <body>
   <div id="app">
-    <h1>Dad Jokes!!!</h1>
-    <p class="tiny">tip: keep clicking until it's funny</p>
+    <h1>Dad Jokes Generator</h1>
+    <p class="subtitle">Need a laugh? Click the button for a random dad joke!</p>
 
-    <div id="joke">Press the big button!</div>
+    <div id="joke" role="status" aria-live="polite" aria-atomic="true">
+      Ready to hear a dad joke? Click the button below!
+    </div>
 
-    <!-- Inline handler on purpose to keep it gloriously messy -->
-    <button onclick="showJoke()">Generate!!!</button>
+    <button 
+      onclick="showJoke()" 
+      onkeydown="handleKeyPress(event)"
+      aria-label="Generate a new dad joke"
+      id="generateButton">
+      Generate Joke
+    </button>
 
-    <!-- Random useless control to clutter the UI -->
-    <label>unused input: <input type="text" placeholder="type anything" /></label>
-
-    <p id="counter" class="tiny">Jokes shown: 0</p>
-
-    <!-- TODO: room for improvement: fetch jokes from API, better layout, accessibility, keyboard support, cleaner JS, nicer colors, debounce, history, favorites, etc. -->
+    <p id="counter" aria-live="polite">Jokes shown: 0</p>
   </div>
 
   <script>
-    // Global variables because why not :)
-    var dadJokes = [
-      "Why don't skeletons fight each other? They don't have the guts.",
-      "I would avoid the sushi if I was you. It's a little fishy.",
-      "I used to hate facial hair, but then it grew on me.",
-      "Want to hear a joke about construction? I'm still working on it.",
-      "I ordered a chicken and an egg from Amazon. I'll let you know.",
-      "I used to play piano by ear, now I use my hands.",
-      "I'm reading a book about anti-gravity. It's impossible to put down.",
-      "Did you hear about the restaurant on the moon? Great food, no atmosphere.",
-      "I got hit in the head with a can of soda. Lucky it was a soft drink.",
-      "I only know 25 letters of the alphabet. I don't know y."
-    ];
-
     // Simple cache to store fetched jokes
     var jokeCache = [];
 
+    // Keyboard support for Enter key
+    function handleKeyPress(event) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        showJoke();
+      }
+    }
+
+    // Add keyboard support for generating jokes
+    document.addEventListener('DOMContentLoaded', function() {
+      document.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter' && event.target.tagName !== 'BUTTON') {
+          showJoke();
+        }
+      });
+    });
+
     function showJoke() {
       var jokeElement = document.getElementById('joke');
+      var button = document.getElementById('generateButton');
       
-      // Show loading message
+      // Show loading state
       jokeElement.innerText = 'Loading joke...';
+      jokeElement.classList.add('loading');
+      button.disabled = true;
       
       // Fetch joke from API
       fetch('https://icanhazdadjoke.com/', {
@@ -72,29 +200,40 @@
       .then(function(data) {
         // Display the joke from API
         jokeElement.innerText = data.joke;
+        jokeElement.classList.remove('loading');
+        button.disabled = false;
         
         // Cache the joke
         if (jokeCache.indexOf(data.joke) === -1) {
           jokeCache.push(data.joke);
         }
         
-        // Bad UX flourish: always force scroll to the top
-        jokeElement.scrollTop = 0;
-        
-        // Sloppy global state counter
+        // Update counter
         window.jokeCount = (window.jokeCount || 0) + 1;
         document.getElementById('counter').innerText = 'Jokes shown: ' + window.jokeCount;
       })
       .catch(function(error) {
         // Fallback to cached jokes or hardcoded jokes on error
+        var dadJokes = [
+          "Why don't skeletons fight each other? They don't have the guts.",
+          "I would avoid the sushi if I was you. It's a little fishy.",
+          "I used to hate facial hair, but then it grew on me.",
+          "Want to hear a joke about construction? I'm still working on it.",
+          "I ordered a chicken and an egg from Amazon. I'll let you know.",
+          "I used to play piano by ear, now I use my hands.",
+          "I'm reading a book about anti-gravity. It's impossible to put down.",
+          "Did you hear about the restaurant on the moon? Great food, no atmosphere.",
+          "I got hit in the head with a can of soda. Lucky it was a soft drink.",
+          "I only know 25 letters of the alphabet. I don't know y."
+        ];
+        
         var fallbackJokes = jokeCache.length > 0 ? jokeCache : dadJokes;
         var i = Math.floor(Math.random() * fallbackJokes.length);
         jokeElement.innerText = fallbackJokes[i];
+        jokeElement.classList.remove('loading');
+        button.disabled = false;
         
-        // Bad UX flourish: always force scroll to the top
-        jokeElement.scrollTop = 0;
-        
-        // Sloppy global state counter
+        // Update counter
         window.jokeCount = (window.jokeCount || 0) + 1;
         document.getElementById('counter').innerText = 'Jokes shown: ' + window.jokeCount;
       });
