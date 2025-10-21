@@ -1,0 +1,31 @@
+<div style="font-family:system-ui;max-width:520px;margin:24px auto;text-align:center">
+  <h2>Messy Star Rating</h2>
+  <div id="stars" style="font-size:48px;cursor:pointer;user-select:none">
+    <span id="s1">☆</span><span id="s2">☆</span><span id="s3">☆</span><span id="s4">☆</span><span id="s5">☆</span>
+  </div>
+  <p id="out">Rating: 0</p>
+</div>
+
+<script>
+  const out = document.getElementById('out');
+  const s1 = document.getElementById('s1');
+  const s2 = document.getElementById('s2');
+  const s3 = document.getElementById('s3');
+  const s4 = document.getElementById('s4');
+  const s5 = document.getElementById('s5');
+  function paint(n){
+    [s1,s2,s3,s4,s5].forEach((el,i)=> el.textContent = (i < n ? '★':'☆'));
+    out.textContent = 'Rating: ' + n;
+  }
+  s1.addEventListener('mouseover', ()=>paint(1));
+  s2.addEventListener('mouseover', ()=>paint(2));
+  s3.addEventListener('mouseover', ()=>paint(3));
+  s4.addEventListener('mouseover', ()=>paint(4));
+  s5.addEventListener('mouseover', ()=>paint(5));
+  s1.addEventListener('click', ()=>paint(1));
+  s2.addEventListener('click', ()=>paint(2));
+  s3.addEventListener('click', ()=>paint(3));
+  s4.addEventListener('click', ()=>paint(4));
+  s5.addEventListener('click', ()=>paint(5));
+  document.getElementById('stars').addEventListener('mouseleave', ()=>paint(0));
+</script>
